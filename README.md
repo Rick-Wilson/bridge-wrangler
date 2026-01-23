@@ -146,12 +146,131 @@ Create a declarer's plan practice sheet:
 bridge-wrangler to-pdf -i deals.pbn -l declarers-plan
 ```
 
+### analyze
+
+Perform double-dummy analysis on deals and optionally add results to PBN files.
+
+```bash
+bridge-wrangler analyze --input <FILE> [OPTIONS]
+```
+
+#### Options
+
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--input <FILE>` | `-i` | Input PBN file (required) | - |
+| `--output <FILE>` | `-o` | Output PBN file with DD results | - |
+| `--board-range <RANGE>` | `-r` | Board range to analyze | all boards |
+| `--verbose` | `-v` | Show DD results table and par scores | off |
+
+#### Output
+
+By default, the command runs quietly and only reports progress. Use `-v` to display the DD results table showing tricks for each declarer (N, S, E, W) in each denomination (NT, S, H, D, C):
+
+```
+       NT   S   H   D   C
+  N     7   6   7   6   6
+  S     7   6   7   6   6
+  E     6   6   6   6   6
+  W     6   6   6   6   6
+```
+
+When using `--output`, the results are added to the PBN file as `[OptimumResultTable]` tags.
+
+#### Examples
+
+Analyze all boards (quiet mode):
+```bash
+bridge-wrangler analyze -i hands.pbn
+```
+
+Analyze and display DD results with par scores:
+```bash
+bridge-wrangler analyze -i hands.pbn -v
+```
+
+Analyze and save results to a new PBN file:
+```bash
+bridge-wrangler analyze -i hands.pbn -o hands-analyzed.pbn
+```
+
+Analyze only boards 1-4:
+```bash
+bridge-wrangler analyze -i hands.pbn -r "1-4" -v
+```
+
+### block-replicate
+
+Replicate boards into blocks for multi-table play. This creates copies of the input boards with correct dealer and vulnerability for each board position, adding tracking tags for the original ("virtual") board information.
+
+```bash
+bridge-wrangler block-replicate --input <FILE> [OPTIONS]
+```
+
+#### Options
+
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--input <FILE>` | `-i` | Input PBN file (required) | - |
+| `--output <FILE>` | `-o` | Output PBN file | `<input> - <B>x<C>.pbn` |
+| `--block-size <N>` | `-b` | Number of boards per block | number of input boards |
+| `--block-count <N>` | `-c` | Number of blocks to create | fills to 36 boards |
+| `--pdf` | | Also generate a PDF hand record | off |
+
+#### How It Works
+
+The command replicates input boards into multiple blocks. Each block contains the same deals as the original, but with:
+
+- **Board numbers** assigned sequentially (1, 2, 3, ...)
+- **Dealer** set according to standard pattern (N, E, S, W, repeating)
+- **Vulnerability** set according to standard 16-board pattern
+
+The first block preserves the original boards completely (including all commentary). Replicated blocks (2+) contain minimal board data with tracking tags:
+- `[VirtualBoard]` - Original board number within the block
+- `[VirtualDealer]` - Original dealer for that board position
+- `[VirtualVulnerable]` - Original vulnerability for that board position
+- `[BlockNumber]` - Which block this board belongs to (1-indexed)
+
+If block_size exceeds the number of input boards, filler deals are used (each player gets all 13 cards of one suit).
+
+#### Examples
+
+Replicate 8 boards into 4 blocks (32 total boards):
+```bash
+bridge-wrangler block-replicate -i session.pbn
+# With 8 input boards: creates 4 blocks of 8 = 32 boards
+# Output: session - 8x4.pbn
+```
+
+Create a specific number of blocks:
+```bash
+bridge-wrangler block-replicate -i hands.pbn -c 6
+# Creates 6 blocks
+```
+
+Create blocks with a specific size:
+```bash
+bridge-wrangler block-replicate -i hands.pbn -b 9 -c 4
+# Creates 4 blocks of 9 boards = 36 total
+```
+
+Specify output file:
+```bash
+bridge-wrangler block-replicate -i deals.pbn -o tournament.pbn
+```
+
+Generate PBN and PDF for dealing machines:
+```bash
+bridge-wrangler block-replicate -i lesson.pbn --pdf
+# Creates: lesson - 4x9.pbn and lesson - 4x9.pdf
+```
+
 ## Dependencies
 
 This tool uses:
 - [bridge-parsers](https://github.com/Rick-Wilson/Bridge-Parsers) - PBN parsing
 - [pbn-to-pdf](https://github.com/Rick-Wilson/pbn-to-pdf) - PDF generation
-- [bridge-solver](https://github.com/Rick-Wilson/Dealer3) - Double-dummy analysis (coming soon)
+- [bridge-solver](https://github.com/Rick-Wilson/Dealer3) - Double-dummy analysis
 
 ## License
 

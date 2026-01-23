@@ -17,6 +17,10 @@ enum Commands {
     RotateDeals(commands::rotate_deals::Args),
     /// Convert PBN file to PDF
     ToPdf(commands::to_pdf::Args),
+    /// Perform double-dummy analysis on deals
+    Analyze(commands::analyze::Args),
+    /// Replicate boards into blocks for multi-table play
+    BlockReplicate(commands::block_replicate::Args),
 }
 
 fn main() -> Result<()> {
@@ -25,5 +29,7 @@ fn main() -> Result<()> {
     match cli.command {
         Commands::RotateDeals(args) => commands::rotate_deals::run(args),
         Commands::ToPdf(args) => commands::to_pdf::run(args),
+        Commands::Analyze(args) => commands::analyze::run(args),
+        Commands::BlockReplicate(args) => commands::block_replicate::run(args),
     }
 }
