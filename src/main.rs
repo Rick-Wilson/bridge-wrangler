@@ -15,6 +15,8 @@ struct Cli {
 enum Commands {
     /// Rotate deals to set dealer/declarer according to a pattern
     RotateDeals(commands::rotate_deals::Args),
+    /// Convert PBN file to PDF
+    ToPdf(commands::to_pdf::Args),
 }
 
 fn main() -> Result<()> {
@@ -22,5 +24,6 @@ fn main() -> Result<()> {
 
     match cli.command {
         Commands::RotateDeals(args) => commands::rotate_deals::run(args),
+        Commands::ToPdf(args) => commands::to_pdf::run(args),
     }
 }

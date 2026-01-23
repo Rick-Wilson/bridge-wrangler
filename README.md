@@ -93,9 +93,65 @@ bridge-wrangler rotate-deals -i deals.pbn -p NESW -b north
 - **Score** - NS/EW prefix swapped for odd rotations
 - **Commentary** - Direction words (North, South, East, West) rotated in text
 
+### to-pdf
+
+Convert PBN files to PDF format with various layout options.
+
+```bash
+bridge-wrangler to-pdf --input <FILE> [OPTIONS]
+```
+
+#### Options
+
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--input <FILE>` | `-i` | Input PBN file (required) | - |
+| `--output <FILE>` | `-o` | Output PDF file | `<input>.pdf` |
+| `--layout <LAYOUT>` | `-l` | Layout style (see below) | `analysis` |
+| `--boards-per-page <N>` | `-b` | Boards per page (1, 2, or 4) | varies by layout |
+| `--board-range <RANGE>` | `-r` | Board range to include | all boards |
+| `--hide-bidding` | - | Hide bidding information | off |
+| `--hide-play` | - | Hide play sequence | off |
+| `--hide-commentary` | - | Hide commentary | off |
+| `--show-hcp` | - | Show high card points | off |
+
+#### Layouts
+
+- `analysis` - Full hand diagram with bidding table and commentary (default)
+- `bidding-sheets` - Simplified layout for practice bidding
+- `declarers-plan` - 4 deals per page for declarer's planning practice
+
+#### Board Range
+
+Specify which boards to include using ranges or lists:
+- `1-4` - Boards 1 through 4
+- `1,3,5` - Boards 1, 3, and 5
+- `1-4,7,9-12` - Combination of ranges and individual boards
+
+#### Examples
+
+Convert a PBN file to PDF:
+```bash
+bridge-wrangler to-pdf -i lesson.pbn
+# Creates: lesson.pdf
+```
+
+Create PDF with only boards 1-4:
+```bash
+bridge-wrangler to-pdf -i hands.pbn -r "1-4" -o first-four.pdf
+```
+
+Create a declarer's plan practice sheet:
+```bash
+bridge-wrangler to-pdf -i deals.pbn -l declarers-plan
+```
+
 ## Dependencies
 
-This tool uses [bridge-parsers](../Bridge-Parsers) as a local dependency for PBN parsing.
+This tool uses:
+- [bridge-parsers](https://github.com/Rick-Wilson/Bridge-Parsers) - PBN parsing
+- [pbn-to-pdf](https://github.com/Rick-Wilson/pbn-to-pdf) - PDF generation
+- [bridge-solver](https://github.com/Rick-Wilson/Dealer3) - Double-dummy analysis (coming soon)
 
 ## License
 
