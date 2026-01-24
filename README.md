@@ -265,6 +265,42 @@ bridge-wrangler block-replicate -i lesson.pbn --pdf
 # Creates: lesson - 4x9.pbn and lesson - 4x9.pdf
 ```
 
+### filter
+
+Filter boards by regex pattern, splitting into matched and non-matched output files.
+
+```bash
+bridge-wrangler filter --input <FILE> --pattern <REGEX> [OPTIONS]
+```
+
+#### Options
+
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--input <FILE>` | `-i` | Input PBN file (required) | - |
+| `--pattern <REGEX>` | `-p` | Regex pattern to match (required) | - |
+| `--matched <FILE>` | `-m` | Output file for matched boards | - |
+| `--not-matched <FILE>` | `-n` | Output file for non-matched boards | - |
+
+The pattern is matched against each board's entire content (all tags and commentary). Both output files receive the original file's header comments.
+
+#### Examples
+
+Filter boards containing "3NT" contract:
+```bash
+bridge-wrangler filter -i hands.pbn -p "3NT" -m slams.pbn
+```
+
+Split boards by vulnerability:
+```bash
+bridge-wrangler filter -i deals.pbn -p '\[Vulnerable "None"\]' -m not-vul.pbn -n vul.pbn
+```
+
+Find boards with specific commentary:
+```bash
+bridge-wrangler filter -i lessons.pbn -p "finesse" -m finesse-boards.pbn
+```
+
 ## Dependencies
 
 This tool uses:

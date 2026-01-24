@@ -21,6 +21,8 @@ enum Commands {
     Analyze(commands::analyze::Args),
     /// Replicate boards into blocks for multi-table play
     BlockReplicate(commands::block_replicate::Args),
+    /// Filter boards by regex pattern
+    Filter(commands::filter::Args),
 }
 
 fn main() -> Result<()> {
@@ -31,5 +33,6 @@ fn main() -> Result<()> {
         Commands::ToPdf(args) => commands::to_pdf::run(args),
         Commands::Analyze(args) => commands::analyze::run(args),
         Commands::BlockReplicate(args) => commands::block_replicate::run(args),
+        Commands::Filter(args) => commands::filter::run(args),
     }
 }
