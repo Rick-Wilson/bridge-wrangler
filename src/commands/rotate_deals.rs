@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Context, Result};
-use bridge_parsers::model::{Board, Direction, Vulnerability};
+use bridge_parsers::{Board, Direction, Vulnerability};
 use bridge_parsers::pbn::read_pbn;
 use clap::{Args as ClapArgs, ValueEnum};
 use regex::Regex;
@@ -199,11 +199,7 @@ fn make_output_path(input: &PathBuf, pattern: &str) -> PathBuf {
 
 /// Check if a board has a valid deal (not empty or placeholder)
 fn board_has_valid_deal(board: &Board) -> bool {
-    let north = &board.deal.north;
-    !north.spades.is_empty()
-        || !north.hearts.is_empty()
-        || !north.diamonds.is_empty()
-        || !north.clubs.is_empty()
+    !board.deal.north.is_empty()
 }
 
 /// Parse extra tags from PBN content that bridge-parsers doesn't handle
@@ -358,7 +354,7 @@ fn rotate_board(board: &mut Board, rotation: u8, use_standard_vul: bool) {
 
     // Rotate the deal (swap hands around the table)
     let old_deal = board.deal.clone();
-    for dir in Direction::all() {
+    for dir in Direction::ALL {
         let source_dir = rotate_direction(dir, 4 - rotation);
         let hand = old_deal.hand(source_dir).clone();
         board.deal.set_hand(dir, hand);

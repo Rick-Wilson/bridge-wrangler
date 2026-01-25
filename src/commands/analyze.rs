@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use bridge_parsers::model::{Board, Direction};
+use bridge_parsers::{Board, Direction, Vulnerability};
 use bridge_parsers::pbn::read_pbn;
 use bridge_solver::{
     CutoffCache, Hands, PatternCache, Solver, CLUB, DIAMOND, EAST, HEART, NORTH, NOTRUMP, SOUTH,
@@ -226,10 +226,10 @@ pub fn run(args: Args) -> Result<()> {
 
             // Show par if vulnerability is known
             let (vul_ns, vul_ew) = match board.vulnerable {
-                bridge_parsers::model::Vulnerability::None => (false, false),
-                bridge_parsers::model::Vulnerability::NorthSouth => (true, false),
-                bridge_parsers::model::Vulnerability::EastWest => (false, true),
-                bridge_parsers::model::Vulnerability::Both => (true, true),
+                Vulnerability::None => (false, false),
+                Vulnerability::NorthSouth => (true, false),
+                Vulnerability::EastWest => (false, true),
+                Vulnerability::Both => (true, true),
             };
             let (par_contract, par_score) = dd_results.par_score(vul_ns, vul_ew);
             println!("  Par: {} ({})\n", par_contract, par_score);
