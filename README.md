@@ -12,6 +12,18 @@ The binary will be at `target/release/bridge-wrangler`.
 
 ## Commands
 
+| Command | Description |
+|---------|-------------|
+| [rotate-deals](#rotate-deals) | Rotate deals to set dealer/declarer according to a pattern |
+| [to-pdf](#to-pdf) | Convert PBN file to PDF with various layouts |
+| [to-lin](#to-lin) | Convert PBN file to LIN format (Bridge Base Online) |
+| [analyze](#analyze) | Perform double-dummy analysis on deals |
+| [block-replicate](#block-replicate) | Replicate boards into blocks for multi-table play |
+| [filter](#filter) | Filter boards by regex pattern |
+| [event](#event) | Update the Event tag for all boards |
+
+---
+
 ### rotate-deals
 
 Rotate deals to set the dealer (or declarer) according to a repeating pattern. This is useful for creating practice sets where a specific player should be dealer for each board.
@@ -146,6 +158,44 @@ Create a declarer's plan practice sheet:
 bridge-wrangler to-pdf -i deals.pbn -l declarers-plan
 ```
 
+### to-lin
+
+Convert PBN files to LIN format (Bridge Base Online's linear format). LIN is a pipe-delimited format used by BBO for hand records that can encode deals, auctions, and cardplay.
+
+```bash
+bridge-wrangler to-lin --input <FILE> [OPTIONS]
+```
+
+#### Options
+
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--input <FILE>` | `-i` | Input PBN file (required) | - |
+| `--output <FILE>` | `-o` | Output LIN file | `<input>.lin` |
+
+#### Output Format
+
+Each board is encoded on a single line containing:
+- `pn|S,W,N,E|` - Player names (South, West, North, East order)
+- `md|dealer+hands|` - Dealer digit (1=S, 2=W, 3=N, 4=E) + hands in S,W,N order
+- `sv|v|` - Vulnerability (o=none, n=NS, e=EW, b=both)
+- `ah|Board N|` - Board header
+- `mb|bid|` - Each bid in the auction
+- `pc|card|` - Each card played
+
+#### Examples
+
+Convert a PBN file to LIN:
+```bash
+bridge-wrangler to-lin -i hands.pbn
+# Creates: hands.lin
+```
+
+Specify output file:
+```bash
+bridge-wrangler to-lin -i session.pbn -o bbo-upload.lin
+```
+
 ### analyze
 
 Perform double-dummy analysis on deals and optionally add results to PBN files.
@@ -267,7 +317,7 @@ bridge-wrangler block-replicate -i lesson.pbn --pdf
 
 ### filter
 
-Filter boards by regex pattern, splitting into matched and non-matched output files.
+Filter boards by regex pattern. Separates boards into matched and/or not-matched output files. Boards are renumbered sequentially by default. Based on the Bridge Composer Filter.js plugin.
 
 ```bash
 bridge-wrangler filter --input <FILE> --pattern <REGEX> [OPTIONS]
@@ -279,26 +329,75 @@ bridge-wrangler filter --input <FILE> --pattern <REGEX> [OPTIONS]
 |--------|-------|-------------|---------|
 | `--input <FILE>` | `-i` | Input PBN file (required) | - |
 | `--pattern <REGEX>` | `-p` | Regex pattern to match (required) | - |
-| `--matched <FILE>` | `-m` | Output file for matched boards | - |
+| `--matched <FILE>` | `-m` | Output file for matched boards | `<input>-Matched.pbn` |
 | `--not-matched <FILE>` | `-n` | Output file for non-matched boards | - |
+| `--case-sensitive` | | Use case-sensitive matching | off (case-insensitive) |
+| `--renumber` | | Renumber boards sequentially (1, 2, 3, ...) | on |
+| `--pdf` | | Also generate PDFs of the output files | off |
 
-The pattern is matched against each board's entire content (all tags and commentary). Both output files receive the original file's header comments.
+If neither `-m` nor `-n` is specified, matched boards are written to the default file. You can specify both to get separate files for matched and not-matched boards.
+
+The pattern is matched against each board's entire content (all tags and commentary). Matching is case-insensitive by default. Output files receive the original file's header comments.
 
 #### Examples
 
-Filter boards containing "3NT" contract:
+Filter boards with notrump contracts:
 ```bash
-bridge-wrangler filter -i hands.pbn -p "3NT" -m slams.pbn
+bridge-wrangler filter -i hands.pbn -p "NT"
+# Creates: hands-Matched.pbn with only NT contract boards
 ```
 
-Split boards by vulnerability:
+Separate matched and not-matched boards:
 ```bash
-bridge-wrangler filter -i deals.pbn -p '\[Vulnerable "None"\]' -m not-vul.pbn -n vul.pbn
+bridge-wrangler filter -i hands.pbn -p "3NT" -m with-3nt.pbn -n without-3nt.pbn
+# Creates both output files
 ```
 
-Find boards with specific commentary:
+Filter by vulnerability and generate PDFs:
 ```bash
-bridge-wrangler filter -i lessons.pbn -p "finesse" -m finesse-boards.pbn
+bridge-wrangler filter -i deals.pbn -p '\[Vulnerable "None"\]' --pdf -m not-vul.pbn
+# Creates: not-vul.pbn and not-vul.pdf
+```
+
+Case-sensitive search for specific contract:
+```bash
+bridge-wrangler filter -i hands.pbn -p '\[Contract "3NT"\]' --case-sensitive
+```
+
+### event
+
+Update the Event tag for all boards in a PBN file.
+
+```bash
+bridge-wrangler event --input <FILE> --event <NAME> [OPTIONS]
+```
+
+#### Options
+
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--input <FILE>` | `-i` | Input PBN file (required) | - |
+| `--event <NAME>` | `-e` | Event name to set (required) | - |
+| `--output <FILE>` | `-o` | Output PBN file | `<input>-Updated.pbn` |
+| `--in-place` | | Update the input file directly | off |
+
+#### Examples
+
+Update event name and write to new file:
+```bash
+bridge-wrangler event -i hands.pbn -e "Club Championship 2024"
+# Creates: hands-Updated.pbn
+```
+
+Update event name in place:
+```bash
+bridge-wrangler event -i hands.pbn -e "Weekly Duplicate" --in-place
+# Modifies hands.pbn directly
+```
+
+Specify output file:
+```bash
+bridge-wrangler event -i raw.pbn -e "Spring Sectional" -o tournament.pbn
 ```
 
 ## Dependencies

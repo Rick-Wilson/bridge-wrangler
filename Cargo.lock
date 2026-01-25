@@ -343,7 +343,6 @@ dependencies = [
 [[package]]
 name = "bridge-types"
 version = "0.1.0"
-source = "git+https://github.com/Rick-Wilson/bridge-types#77df9b90ad76ee3d1b49519d4415814943c9ddfa"
 
 [[package]]
 name = "bridge-wrangler"

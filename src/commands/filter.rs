@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use clap::Args as ClapArgs;
-use regex::Regex;
+use pbn_to_pdf::{config::Settings, parser::parse_pbn, render::generate_pdf};
+use regex::RegexBuilder;
 use std::path::PathBuf;
 
 #[derive(ClapArgs)]
@@ -13,18 +14,32 @@ pub struct Args {
     #[arg(short = 'p', long)]
     pub pattern: String,
 
-    /// Output file for matched boards
+    /// Output file for matched boards (defaults to <input>-Matched.pbn if neither -m nor -n specified)
     #[arg(short = 'm', long)]
     pub matched: Option<PathBuf>,
 
     /// Output file for non-matched boards
-    #[arg(short = 'n', long)]
+    #[arg(short = 'n', long = "not-matched")]
     pub not_matched: Option<PathBuf>,
+
+    /// Case-sensitive matching (default is case-insensitive)
+    #[arg(long)]
+    pub case_sensitive: bool,
+
+    /// Renumber boards sequentially (1, 2, 3, ...)
+    #[arg(long, default_value = "true")]
+    pub renumber: bool,
+
+    /// Also generate PDFs of the output files
+    #[arg(long)]
+    pub pdf: bool,
 }
 
 pub fn run(args: Args) -> Result<()> {
-    // Compile the regex pattern
-    let re = Regex::new(&args.pattern)
+    // Compile the regex pattern (case-insensitive by default, like the JS version)
+    let re = RegexBuilder::new(&args.pattern)
+        .case_insensitive(!args.case_sensitive)
+        .build()
         .with_context(|| format!("Invalid regex pattern: {}", args.pattern))?;
 
     // Read input file
@@ -41,7 +56,7 @@ pub fn run(args: Args) -> Result<()> {
         return Ok(());
     }
 
-    // Filter boards
+    // Separate boards into matched and not-matched
     let mut matched_boards = Vec::new();
     let mut not_matched_boards = Vec::new();
 
@@ -57,31 +72,106 @@ pub fn run(args: Args) -> Result<()> {
     let not_matched_count = not_matched_boards.len();
     let match_percent = (matched_count as f64 / total_boards as f64) * 100.0;
 
-    // Write matched boards if output specified
-    if let Some(ref matched_path) = args.matched {
-        let output = build_output(&header, &matched_boards);
-        std::fs::write(matched_path, output)
+    // Determine which outputs to write
+    // If neither -m nor -n specified, default to matched output
+    let write_matched = args.matched.is_some() || args.not_matched.is_none();
+    let write_not_matched = args.not_matched.is_some();
+
+    // Helper to get default output path
+    let get_default_path = |suffix: &str| {
+        let stem = args.input.file_stem().unwrap_or_default().to_string_lossy();
+        let parent = args.input.parent().unwrap_or(std::path::Path::new("."));
+        parent.join(format!("{}-{}.pbn", stem, suffix))
+    };
+
+    // Write matched boards if requested
+    if write_matched {
+        let matched_path = args.matched.clone().unwrap_or_else(|| get_default_path("Matched"));
+
+        let output_boards = if args.renumber {
+            renumber_boards(&matched_boards)
+        } else {
+            matched_boards.clone()
+        };
+
+        let output_content = build_output(&header, &output_boards);
+
+        std::fs::write(&matched_path, &output_content)
             .with_context(|| format!("Failed to write matched file: {}", matched_path.display()))?;
+
         println!("Wrote {} matched boards to {}", matched_count, matched_path.display());
+
+        // Generate PDF if requested
+        if args.pdf && matched_count > 0 {
+            generate_pdf_file(&output_content, &matched_path)?;
+        }
     }
 
-    // Write non-matched boards if output specified
-    if let Some(ref not_matched_path) = args.not_matched {
-        let output = build_output(&header, &not_matched_boards);
-        std::fs::write(not_matched_path, output)
+    // Write not-matched boards if requested
+    if write_not_matched {
+        let not_matched_path = args.not_matched.clone().unwrap();
+
+        let output_boards = if args.renumber {
+            renumber_boards(&not_matched_boards)
+        } else {
+            not_matched_boards.clone()
+        };
+
+        let output_content = build_output(&header, &output_boards);
+
+        std::fs::write(&not_matched_path, &output_content)
             .with_context(|| format!("Failed to write not-matched file: {}", not_matched_path.display()))?;
-        println!("Wrote {} non-matched boards to {}", not_matched_count, not_matched_path.display());
+
+        println!("Wrote {} not-matched boards to {}", not_matched_count, not_matched_path.display());
+
+        // Generate PDF if requested
+        if args.pdf && not_matched_count > 0 {
+            generate_pdf_file(&output_content, &not_matched_path)?;
+        }
     }
 
-    // Report results
+    // Print summary
     println!();
     println!("Filter results for pattern: {}", args.pattern);
-    println!("  Boards searched:    {}", total_boards);
+    println!("  Boards scanned:     {}", total_boards);
     println!("  Boards matched:     {}", matched_count);
     println!("  Boards not matched: {}", not_matched_count);
     println!("  Match rate:         {:.1}%", match_percent);
 
     Ok(())
+}
+
+/// Generate PDF from PBN content and write to file
+fn generate_pdf_file(pbn_content: &str, pbn_path: &PathBuf) -> Result<()> {
+    let pdf_path = pbn_path.with_extension("pdf");
+
+    let pbn_file = parse_pbn(pbn_content)
+        .map_err(|e| anyhow::anyhow!("Failed to parse PBN for PDF: {:?}", e))?;
+
+    let settings = Settings::default().with_metadata(&pbn_file.metadata);
+
+    let pdf_bytes = generate_pdf(&pbn_file.boards, &settings)
+        .map_err(|e| anyhow::anyhow!("Failed to generate PDF: {:?}", e))?;
+
+    std::fs::write(&pdf_path, &pdf_bytes)
+        .with_context(|| format!("Failed to write PDF: {}", pdf_path.display()))?;
+
+    println!("Wrote PDF to {}", pdf_path.display());
+    Ok(())
+}
+
+/// Renumber boards sequentially starting from 1
+fn renumber_boards(boards: &[String]) -> Vec<String> {
+    let board_re = regex::Regex::new(r#"\[Board\s+"[^"]*"\]"#).unwrap();
+
+    boards
+        .iter()
+        .enumerate()
+        .map(|(i, section)| {
+            let new_board_tag = format!("[Board \"{}\"]", i + 1);
+            board_re.replace(section, new_board_tag.as_str()).to_string()
+        })
+        .collect()
 }
 
 /// Build output content from header and board sections
@@ -140,12 +230,42 @@ mod tests {
 
     #[test]
     fn test_regex_matching() {
-        let re = Regex::new(r#"\[Contract "3NT"\]"#).unwrap();
+        let re = RegexBuilder::new(r#"\[Contract "3NT"\]"#)
+            .case_insensitive(true)
+            .build()
+            .unwrap();
         let board = r#"[Board "1"]
 [Contract "3NT"]
 [Deal "N:..."]
 "#;
         assert!(re.is_match(board));
+    }
+
+    #[test]
+    fn test_case_insensitive_matching() {
+        let re = RegexBuilder::new("3nt")
+            .case_insensitive(true)
+            .build()
+            .unwrap();
+        let board = r#"[Contract "3NT"]"#;
+        assert!(re.is_match(board));
+    }
+
+    #[test]
+    fn test_renumber_boards() {
+        let boards = vec![
+            r#"[Board "5"]
+[Deal "N:..."]
+"#
+            .to_string(),
+            r#"[Board "8"]
+[Deal "N:..."]
+"#
+            .to_string(),
+        ];
+        let renumbered = renumber_boards(&boards);
+        assert!(renumbered[0].contains("[Board \"1\"]"));
+        assert!(renumbered[1].contains("[Board \"2\"]"));
     }
 
     #[test]

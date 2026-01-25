@@ -23,3 +23,6 @@ bridge-solver = { path = "../bridge-solver" }
 
 [patch."https://github.com/Rick-Wilson/pbn-to-pdf"]
 pbn-to-pdf = { path = "../pbn-to-pdf" }
+
+[patch."https://github.com/Rick-Wilson/bridge-types"]
+bridge-types = { path = "../bridge-types" }

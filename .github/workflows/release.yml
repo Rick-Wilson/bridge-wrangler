@@ -1,0 +1,110 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  build-release:
+    name: Build Release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: bridge-wrangler
+            asset: bridge-wrangler-linux-x86_64
+            strip: true
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: bridge-wrangler.exe
+            asset: bridge-wrangler-windows-x86_64.exe
+            strip: false
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: bridge-wrangler
+            asset: bridge-wrangler-macos-x86_64
+            strip: false
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: bridge-wrangler
+            asset: bridge-wrangler-macos-aarch64
+            strip: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Build release binary
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Strip binary (Linux only)
+        if: matrix.strip
+        run: strip target/${{ matrix.target }}/release/${{ matrix.artifact }}
+
+      - name: Create distribution package
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp target/${{ matrix.target }}/release/${{ matrix.artifact }} dist/${{ matrix.asset }}
+          cp LICENSE dist/ 2>/dev/null || echo "No LICENSE file"
+          if [ -f README.md ]; then
+            cp README.md dist/
+          fi
+
+      - name: Create tarball (Linux and macOS)
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          cd dist
+          if [ -f README.md ]; then
+            tar -czf ${{ matrix.asset }}.tar.gz ${{ matrix.asset }} LICENSE README.md 2>/dev/null || \
+            tar -czf ${{ matrix.asset }}.tar.gz ${{ matrix.asset }} README.md
+          else
+            tar -czf ${{ matrix.asset }}.tar.gz ${{ matrix.asset }} LICENSE 2>/dev/null || \
+            tar -czf ${{ matrix.asset }}.tar.gz ${{ matrix.asset }}
+          fi
+
+      - name: Create zip (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          cd dist
+          if [ -f README.md ]; then
+            7z a ${{ matrix.asset }}.zip ${{ matrix.asset }} LICENSE README.md 2>/dev/null || \
+            7z a ${{ matrix.asset }}.zip ${{ matrix.asset }} README.md
+          else
+            7z a ${{ matrix.asset }}.zip ${{ matrix.asset }} LICENSE 2>/dev/null || \
+            7z a ${{ matrix.asset }}.zip ${{ matrix.asset }}
+          fi
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/${{ matrix.asset }}.tar.gz
+            dist/${{ matrix.asset }}.zip
+            dist/${{ matrix.asset }}
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
