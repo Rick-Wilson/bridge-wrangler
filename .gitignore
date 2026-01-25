@@ -1,3 +1,4 @@
 /target
 /tests/fixtures/output/
 .DS_Store
+/.cargo/
