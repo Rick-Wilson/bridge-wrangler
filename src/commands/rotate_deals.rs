@@ -1,10 +1,10 @@
 use anyhow::{anyhow, Context, Result};
-use bridge_parsers::{Board, Direction, Vulnerability};
 use bridge_parsers::pbn::read_pbn;
+use bridge_parsers::{Board, Direction, Vulnerability};
 use clap::{Args as ClapArgs, ValueEnum};
 use regex::Regex;
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, Copy, ValueEnum, Default)]
 pub enum RotationBasis {
@@ -129,7 +129,7 @@ pub fn run(args: Args) -> Result<()> {
 
         // Clone boards for this pattern
         let mut rotated_boards = boards.clone();
-        rotated_boards.retain(|b| board_has_valid_deal(b));
+        rotated_boards.retain(board_has_valid_deal);
 
         // Track rotation info per board
         let mut rotation_infos: HashMap<u32, RotationInfo> = HashMap::new();
@@ -153,13 +153,16 @@ pub fn run(args: Args) -> Result<()> {
             // Calculate rotation amount (0-3)
             let rotation = rotation_amount(basis_dir, target);
 
-            rotation_infos.insert(board_num, RotationInfo {
-                rotation,
-                target,
-                basis: basis_dir,
-                basis_kind: basis_kind.to_string(),
-                use_standard_vul: args.standard_vul,
-            });
+            rotation_infos.insert(
+                board_num,
+                RotationInfo {
+                    rotation,
+                    target,
+                    basis: basis_dir,
+                    basis_kind: basis_kind.to_string(),
+                    use_standard_vul: args.standard_vul,
+                },
+            );
 
             if rotation != 0 {
                 rotate_board(board, rotation, args.standard_vul);
@@ -168,13 +171,16 @@ pub fn run(args: Args) -> Result<()> {
 
         // Determine output path
         let output_path = if patterns.len() == 1 {
-            args.output.clone().unwrap_or_else(|| make_output_path(&args.input, pattern_str))
+            args.output
+                .clone()
+                .unwrap_or_else(|| make_output_path(&args.input, pattern_str))
         } else {
             make_output_path(&args.input, pattern_str)
         };
 
         // Write output using our custom writer that handles extra tags
-        let output_content = write_rotated_pbn(&content, &extra_tags, &rotated_boards, &rotation_infos)?;
+        let output_content =
+            write_rotated_pbn(&content, &extra_tags, &rotated_boards, &rotation_infos)?;
         std::fs::write(&output_path, output_content)
             .with_context(|| format!("Failed to write output file: {}", output_path.display()))?;
 
@@ -188,7 +194,7 @@ pub fn run(args: Args) -> Result<()> {
     Ok(())
 }
 
-fn make_output_path(input: &PathBuf, pattern: &str) -> PathBuf {
+fn make_output_path(input: &Path, pattern: &str) -> PathBuf {
     let stem = input.file_stem().unwrap_or_default().to_string_lossy();
     let ext = input
         .extension()
@@ -285,9 +291,18 @@ fn find_basis(
                 (Direction::North, "North")
             }
         }
-        RotationBasis::BasisTag => (get_tag_direction("RotationBasis").unwrap_or(Direction::North), "RotationBasis"),
-        RotationBasis::Student => (get_tag_direction("Student").unwrap_or(Direction::North), "Student"),
-        RotationBasis::Declarer => (get_tag_direction("Declarer").unwrap_or(Direction::North), "Declarer"),
+        RotationBasis::BasisTag => (
+            get_tag_direction("RotationBasis").unwrap_or(Direction::North),
+            "RotationBasis",
+        ),
+        RotationBasis::Student => (
+            get_tag_direction("Student").unwrap_or(Direction::North),
+            "Student",
+        ),
+        RotationBasis::Declarer => (
+            get_tag_direction("Declarer").unwrap_or(Direction::North),
+            "Declarer",
+        ),
         RotationBasis::Dealer => (board.dealer.unwrap_or(Direction::North), "Dealer"),
         RotationBasis::Deal => {
             // The deal's first character indicates which hand is listed first
@@ -387,14 +402,14 @@ fn rotate_direction_value(value: &str, rotation: u8) -> String {
 
 /// Rotate a Score tag value (e.g., "NS 420" -> "EW 420" for odd rotations)
 fn rotate_score_value(value: &str, rotation: u8) -> String {
-    if rotation % 2 == 0 {
+    if rotation.is_multiple_of(2) {
         return value.to_string();
     }
 
-    if value.starts_with("NS") {
-        format!("EW{}", &value[2..])
-    } else if value.starts_with("EW") {
-        format!("NS{}", &value[2..])
+    if let Some(rest) = value.strip_prefix("NS") {
+        format!("EW{}", rest)
+    } else if let Some(rest) = value.strip_prefix("EW") {
+        format!("NS{}", rest)
     } else {
         value.to_string()
     }
@@ -593,7 +608,10 @@ fn write_rotated_pbn(
                 // Handle tags that need rotation
                 let new_line = match tag_name {
                     "Dealer" => {
-                        format!("[Dealer \"{}\"]", board.dealer.map(|d| d.to_char()).unwrap_or('N'))
+                        format!(
+                            "[Dealer \"{}\"]",
+                            board.dealer.map(|d| d.to_char()).unwrap_or('N')
+                        )
                     }
                     "Vulnerable" => {
                         format!("[Vulnerable \"{}\"]", board.vulnerable.to_pbn())
@@ -693,13 +711,7 @@ mod tests {
 
     #[test]
     fn test_rotate_commentary() {
-        assert_eq!(
-            rotate_commentary("North leads", 2),
-            "South leads"
-        );
-        assert_eq!(
-            rotate_commentary("East and West", 1),
-            "South and North"
-        );
+        assert_eq!(rotate_commentary("North leads", 2), "South leads");
+        assert_eq!(rotate_commentary("East and West", 1), "South and North");
     }
 }

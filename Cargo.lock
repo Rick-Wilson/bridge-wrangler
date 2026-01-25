@@ -312,6 +312,7 @@ dependencies = [
 [[package]]
 name = "bridge-parsers"
 version = "0.1.0"
+source = "git+https://github.com/Rick-Wilson/Bridge-Parsers#3fdde103f1b740ed4d7a63d937e4c22222741f44"
 dependencies = [
  "anyhow",
  "bridge-encodings",
@@ -336,6 +337,7 @@ dependencies = [
 [[package]]
 name = "bridge-solver"
 version = "0.4.0"
+source = "git+https://github.com/Rick-Wilson/bridge-solver#7e91411c6476754664aa51c73d0d95b476cbf902"
 dependencies = [
  "bridge-types",
 ]
@@ -343,6 +345,7 @@ dependencies = [
 [[package]]
 name = "bridge-types"
 version = "0.1.0"
+source = "git+https://github.com/Rick-Wilson/bridge-types#37e8ef726cab5159673d99b0a9677486d045e324"
 
 [[package]]
 name = "bridge-wrangler"
@@ -2125,6 +2128,7 @@ dependencies = [
 [[package]]
 name = "pbn-to-pdf"
 version = "1.0.0"
+source = "git+https://github.com/Rick-Wilson/pbn-to-pdf#a26482437b2842582c0d01e8f27d21259f132417"
 dependencies = [
  "anyhow",
  "bridge-types",

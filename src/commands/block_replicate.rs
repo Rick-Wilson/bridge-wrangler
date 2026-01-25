@@ -30,22 +30,22 @@ pub struct Args {
 
 /// Standard vulnerability pattern (repeats every 16 boards)
 const STANDARD_VUL: [Vulnerability; 16] = [
-    Vulnerability::None,      // 1
+    Vulnerability::None,       // 1
     Vulnerability::NorthSouth, // 2
-    Vulnerability::EastWest,  // 3
-    Vulnerability::Both,      // 4
+    Vulnerability::EastWest,   // 3
+    Vulnerability::Both,       // 4
     Vulnerability::NorthSouth, // 5
-    Vulnerability::EastWest,  // 6
-    Vulnerability::Both,      // 7
-    Vulnerability::None,      // 8
-    Vulnerability::EastWest,  // 9
-    Vulnerability::Both,      // 10
-    Vulnerability::None,      // 11
+    Vulnerability::EastWest,   // 6
+    Vulnerability::Both,       // 7
+    Vulnerability::None,       // 8
+    Vulnerability::EastWest,   // 9
+    Vulnerability::Both,       // 10
+    Vulnerability::None,       // 11
     Vulnerability::NorthSouth, // 12
-    Vulnerability::Both,      // 13
-    Vulnerability::None,      // 14
+    Vulnerability::Both,       // 13
+    Vulnerability::None,       // 14
     Vulnerability::NorthSouth, // 15
-    Vulnerability::EastWest,  // 16
+    Vulnerability::EastWest,   // 16
 ];
 
 /// Standard dealer pattern (repeats every 4 boards)
@@ -137,8 +137,7 @@ pub fn run(args: Args) -> Result<()> {
             .map_err(|e| anyhow::anyhow!("Failed to parse PBN for PDF: {:?}", e))?;
 
         // Use hand-record style settings for dealing machine output
-        let settings = Settings::default()
-            .with_metadata(&pbn_file.metadata);
+        let settings = Settings::default().with_metadata(&pbn_file.metadata);
 
         let pdf_bytes = generate_pdf(&pbn_file.boards, &settings)
             .map_err(|e| anyhow::anyhow!("Failed to generate PDF: {:?}", e))?;
@@ -235,8 +234,14 @@ fn generate_replicated_pbn(
 
         // Add virtual board tags for tracking (only for replicated boards)
         output.push_str(&format!("[VirtualBoard \"{}\"]\n", virtual_board));
-        output.push_str(&format!("[VirtualDealer \"{}\"]\n", virtual_dealer.to_char()));
-        output.push_str(&format!("[VirtualVulnerable \"{}\"]\n", virtual_vul.to_pbn()));
+        output.push_str(&format!(
+            "[VirtualDealer \"{}\"]\n",
+            virtual_dealer.to_char()
+        ));
+        output.push_str(&format!(
+            "[VirtualVulnerable \"{}\"]\n",
+            virtual_vul.to_pbn()
+        ));
         output.push_str(&format!("[BlockNumber \"{}\"]\n", block_num + 1));
 
         output.push('\n');

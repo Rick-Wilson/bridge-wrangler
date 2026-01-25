@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
-use bridge_parsers::{Board, Direction, Vulnerability};
 use bridge_parsers::pbn::read_pbn;
+use bridge_parsers::{Board, Direction, Vulnerability};
 use bridge_solver::{
     CutoffCache, Hands, PatternCache, Solver, CLUB, DIAMOND, EAST, HEART, NORTH, NOTRUMP, SOUTH,
     SPADE, WEST,
@@ -128,9 +128,9 @@ fn calculate_score(level: u8, denom_idx: usize, tricks: u8, vul: bool, doubled: 
 
     // Trick values
     let trick_value = match denom_idx {
-        0 => 30, // NT (but first trick is 40)
+        0 => 30,     // NT (but first trick is 40)
         1 | 2 => 30, // Major
-        _ => 20, // Minor
+        _ => 20,     // Minor
     };
 
     let mut score = if denom_idx == 0 {
@@ -145,9 +145,9 @@ fn calculate_score(level: u8, denom_idx: usize, tricks: u8, vul: bool, doubled: 
 
     // Game/slam bonuses
     let game_threshold = match denom_idx {
-        0 => 3,    // 3NT
+        0 => 3,     // 3NT
         1 | 2 => 4, // 4M
-        _ => 5,    // 5m
+        _ => 5,     // 5m
     };
 
     if level >= game_threshold {
@@ -164,7 +164,11 @@ fn calculate_score(level: u8, denom_idx: usize, tricks: u8, vul: bool, doubled: 
 
     // Overtricks
     let overtrick_value = if doubled {
-        if vul { 200 } else { 100 }
+        if vul {
+            200
+        } else {
+            100
+        }
     } else {
         trick_value
     };
@@ -180,11 +184,7 @@ pub fn run(args: Args) -> Result<()> {
 
     let boards = read_pbn(&content).map_err(|e| anyhow::anyhow!("Failed to parse PBN: {:?}", e))?;
 
-    println!(
-        "Read {} boards from {}",
-        boards.len(),
-        args.input.display()
-    );
+    println!("Read {} boards from {}", boards.len(), args.input.display());
 
     // Filter boards if range specified
     let boards: Vec<Board> = if let Some(ref range) = args.board_range {
@@ -256,10 +256,10 @@ fn board_to_hands(board: &Board) -> Option<Hands> {
     let deal = &board.deal;
 
     // Check if deal has cards (at least one hand has cards)
-    if deal.hand(Direction::North).len() == 0
-        && deal.hand(Direction::East).len() == 0
-        && deal.hand(Direction::South).len() == 0
-        && deal.hand(Direction::West).len() == 0
+    if deal.hand(Direction::North).is_empty()
+        && deal.hand(Direction::East).is_empty()
+        && deal.hand(Direction::South).is_empty()
+        && deal.hand(Direction::West).is_empty()
     {
         return None;
     }

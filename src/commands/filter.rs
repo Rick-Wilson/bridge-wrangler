@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use clap::Args as ClapArgs;
 use pbn_to_pdf::{config::Settings, parser::parse_pbn, render::generate_pdf};
 use regex::RegexBuilder;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(ClapArgs)]
 pub struct Args {
@@ -86,7 +86,10 @@ pub fn run(args: Args) -> Result<()> {
 
     // Write matched boards if requested
     if write_matched {
-        let matched_path = args.matched.clone().unwrap_or_else(|| get_default_path("Matched"));
+        let matched_path = args
+            .matched
+            .clone()
+            .unwrap_or_else(|| get_default_path("Matched"));
 
         let output_boards = if args.renumber {
             renumber_boards(&matched_boards)
@@ -99,7 +102,11 @@ pub fn run(args: Args) -> Result<()> {
         std::fs::write(&matched_path, &output_content)
             .with_context(|| format!("Failed to write matched file: {}", matched_path.display()))?;
 
-        println!("Wrote {} matched boards to {}", matched_count, matched_path.display());
+        println!(
+            "Wrote {} matched boards to {}",
+            matched_count,
+            matched_path.display()
+        );
 
         // Generate PDF if requested
         if args.pdf && matched_count > 0 {
@@ -119,10 +126,18 @@ pub fn run(args: Args) -> Result<()> {
 
         let output_content = build_output(&header, &output_boards);
 
-        std::fs::write(&not_matched_path, &output_content)
-            .with_context(|| format!("Failed to write not-matched file: {}", not_matched_path.display()))?;
+        std::fs::write(&not_matched_path, &output_content).with_context(|| {
+            format!(
+                "Failed to write not-matched file: {}",
+                not_matched_path.display()
+            )
+        })?;
 
-        println!("Wrote {} not-matched boards to {}", not_matched_count, not_matched_path.display());
+        println!(
+            "Wrote {} not-matched boards to {}",
+            not_matched_count,
+            not_matched_path.display()
+        );
 
         // Generate PDF if requested
         if args.pdf && not_matched_count > 0 {
@@ -142,7 +157,7 @@ pub fn run(args: Args) -> Result<()> {
 }
 
 /// Generate PDF from PBN content and write to file
-fn generate_pdf_file(pbn_content: &str, pbn_path: &PathBuf) -> Result<()> {
+fn generate_pdf_file(pbn_content: &str, pbn_path: &Path) -> Result<()> {
     let pdf_path = pbn_path.with_extension("pdf");
 
     let pbn_file = parse_pbn(pbn_content)
@@ -169,7 +184,9 @@ fn renumber_boards(boards: &[String]) -> Vec<String> {
         .enumerate()
         .map(|(i, section)| {
             let new_board_tag = format!("[Board \"{}\"]", i + 1);
-            board_re.replace(section, new_board_tag.as_str()).to_string()
+            board_re
+                .replace(section, new_board_tag.as_str())
+                .to_string()
         })
         .collect()
 }

@@ -1,8 +1,6 @@
 use anyhow::{Context, Result};
 use clap::Args as ClapArgs;
-use pbn_to_pdf::model::{
-    Auction, Board, Call, Direction, Hand, PlaySequence, Suit, Vulnerability,
-};
+use pbn_to_pdf::model::{Auction, Board, Call, Direction, Hand, PlaySequence, Suit, Vulnerability};
 use pbn_to_pdf::parser::parse_pbn;
 use std::path::PathBuf;
 
@@ -22,31 +20,24 @@ pub fn run(args: Args) -> Result<()> {
     let content = std::fs::read_to_string(&args.input)
         .with_context(|| format!("Failed to read input file: {}", args.input.display()))?;
 
-    let pbn_file = parse_pbn(&content)
-        .map_err(|e| anyhow::anyhow!("Failed to parse PBN: {:?}", e))?;
+    let pbn_file =
+        parse_pbn(&content).map_err(|e| anyhow::anyhow!("Failed to parse PBN: {:?}", e))?;
 
     // Convert each board to LIN format
-    let lin_lines: Vec<String> = pbn_file
-        .boards
-        .iter()
-        .map(|board| encode_board_to_lin(board))
-        .collect();
+    let lin_lines: Vec<String> = pbn_file.boards.iter().map(encode_board_to_lin).collect();
 
     let lin_content = lin_lines.join("\n");
 
     // Determine output path
-    let output_path = args.output.unwrap_or_else(|| {
-        args.input.with_extension("lin")
-    });
+    let output_path = args
+        .output
+        .unwrap_or_else(|| args.input.with_extension("lin"));
 
     // Write output
     std::fs::write(&output_path, &lin_content)
         .with_context(|| format!("Failed to write output file: {}", output_path.display()))?;
 
-    println!(
-        "Converted {} boards to LIN format",
-        pbn_file.boards.len()
-    );
+    println!("Converted {} boards to LIN format", pbn_file.boards.len());
     println!("Wrote to {}", output_path.display());
 
     Ok(())
@@ -179,16 +170,14 @@ fn encode_auction(parts: &mut Vec<String>, auction: &Auction) {
 /// Encode play sequence to LIN format
 fn encode_play(parts: &mut Vec<String>, play: &PlaySequence) {
     for trick in &play.tricks {
-        for card_opt in &trick.cards {
-            if let Some(card) = card_opt {
-                let suit_char = match card.suit {
-                    Suit::Spades => 'S',
-                    Suit::Hearts => 'H',
-                    Suit::Diamonds => 'D',
-                    Suit::Clubs => 'C',
-                };
-                parts.push(format!("pc|{}{}|", suit_char, card.rank.to_char()));
-            }
+        for card in trick.cards.iter().flatten() {
+            let suit_char = match card.suit {
+                Suit::Spades => 'S',
+                Suit::Hearts => 'H',
+                Suit::Diamonds => 'D',
+                Suit::Clubs => 'C',
+            };
+            parts.push(format!("pc|{}{}|", suit_char, card.rank.to_char()));
         }
     }
 }

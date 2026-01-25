@@ -13,16 +13,3 @@ pbn-to-pdf = { git = "https://github.com/Rick-Wilson/pbn-to-pdf" }
 anyhow = "1.0"
 thiserror = "2.0"
 regex = "1.11"
-
-# Local development overrides - these are ignored if paths don't exist
-[patch."https://github.com/Rick-Wilson/Bridge-Parsers"]
-bridge-parsers = { path = "../Bridge-Parsers" }
-
-[patch."https://github.com/Rick-Wilson/bridge-solver"]
-bridge-solver = { path = "../bridge-solver" }
-
-[patch."https://github.com/Rick-Wilson/pbn-to-pdf"]
-pbn-to-pdf = { path = "../pbn-to-pdf" }
-
-[patch."https://github.com/Rick-Wilson/bridge-types"]
-bridge-types = { path = "../bridge-types" }

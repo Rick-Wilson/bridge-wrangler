@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use clap::{Args as ClapArgs, ValueEnum};
-use pbn_to_pdf::{config::Settings, parser::parse_pbn, render::generate_pdf};
 use pbn_to_pdf::cli::Layout as PdfLayout;
+use pbn_to_pdf::{config::Settings, parser::parse_pbn, render::generate_pdf};
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, Copy, ValueEnum, Default)]
@@ -70,10 +70,14 @@ pub fn run(args: Args) -> Result<()> {
         .with_context(|| format!("Failed to read input file: {}", args.input.display()))?;
 
     // Parse PBN
-    let pbn_file = parse_pbn(&content)
-        .map_err(|e| anyhow::anyhow!("Failed to parse PBN: {:?}", e))?;
+    let pbn_file =
+        parse_pbn(&content).map_err(|e| anyhow::anyhow!("Failed to parse PBN: {:?}", e))?;
 
-    println!("Parsed {} boards from {}", pbn_file.boards.len(), args.input.display());
+    println!(
+        "Parsed {} boards from {}",
+        pbn_file.boards.len(),
+        args.input.display()
+    );
 
     // Filter boards if range specified
     let boards = if let Some(ref range) = args.board_range {
@@ -119,9 +123,9 @@ pub fn run(args: Args) -> Result<()> {
         .map_err(|e| anyhow::anyhow!("Failed to generate PDF: {:?}", e))?;
 
     // Determine output path
-    let output_path = args.output.unwrap_or_else(|| {
-        args.input.with_extension("pdf")
-    });
+    let output_path = args
+        .output
+        .unwrap_or_else(|| args.input.with_extension("pdf"));
 
     // Write output
     std::fs::write(&output_path, &pdf_bytes)
@@ -143,15 +147,20 @@ fn parse_board_range(range: &str) -> Result<Vec<u32>> {
             if parts.len() != 2 {
                 return Err(anyhow::anyhow!("Invalid range: {}", part));
             }
-            let start: u32 = parts[0].trim().parse()
+            let start: u32 = parts[0]
+                .trim()
+                .parse()
                 .with_context(|| format!("Invalid number in range: {}", parts[0]))?;
-            let end: u32 = parts[1].trim().parse()
+            let end: u32 = parts[1]
+                .trim()
+                .parse()
                 .with_context(|| format!("Invalid number in range: {}", parts[1]))?;
             for i in start..=end {
                 boards.push(i);
             }
         } else {
-            let num: u32 = part.parse()
+            let num: u32 = part
+                .parse()
                 .with_context(|| format!("Invalid board number: {}", part))?;
             boards.push(num);
         }
