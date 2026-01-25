@@ -199,7 +199,7 @@ fn make_output_path(input: &PathBuf, pattern: &str) -> PathBuf {
 
 /// Check if a board has a valid deal (not empty or placeholder)
 fn board_has_valid_deal(board: &Board) -> bool {
-    !board.deal.north.is_empty()
+    board.deal.has_cards()
 }
 
 /// Parse extra tags from PBN content that bridge-parsers doesn't handle
