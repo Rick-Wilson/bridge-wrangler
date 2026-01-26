@@ -146,7 +146,7 @@ fn encode_auction(parts: &mut Vec<String>, auction: &Auction) {
             Call::Pass => "p".to_string(),
             Call::Double => "d".to_string(),
             Call::Redouble => "r".to_string(),
-            Call::Continue => continue, // Skip continue markers in LIN
+            Call::Continue | Call::Blank => continue, // Skip continue/blank markers in LIN
             Call::Bid { level, strain } => {
                 let strain_str = strain.to_char();
                 format!("{}{}", level, strain_str)
