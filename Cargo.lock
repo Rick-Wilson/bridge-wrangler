@@ -323,7 +323,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bridge-encodings",
- "bridge-solver",
  "bridge-types",
  "clap",
  "csv",
@@ -331,7 +330,6 @@ dependencies = [
  "lazy_static",
  "log",
  "nom 8.0.0",
- "rayon",
  "regex",
  "reqwest",
  "rust_xlsxwriter",
@@ -354,7 +352,7 @@ version = "0.1.0"
 
 [[package]]
 name = "bridge-wrangler"
-version = "0.1.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "bridge-parsers",
@@ -2169,7 +2167,7 @@ dependencies = [
 
 [[package]]
 name = "pbn-to-pdf"
-version = "0.4.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "bridge-types",
