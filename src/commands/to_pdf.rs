@@ -1,7 +1,11 @@
 use anyhow::{Context, Result};
 use clap::{Args as ClapArgs, ValueEnum};
 use pbn_to_pdf::cli::Layout as PdfLayout;
-use pbn_to_pdf::{config::Settings, parser::parse_pbn, render::generate_pdf};
+use pbn_to_pdf::{
+    config::Settings,
+    parser::parse_pbn,
+    render::{generate_pdf, BiddingSheetsRenderer, DeclarersPlanRenderer},
+};
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, Copy, ValueEnum, Default)]
@@ -118,9 +122,25 @@ pub fn run(args: Args) -> Result<()> {
         settings.show_hcp = true;
     }
 
-    // Generate PDF
-    let pdf_bytes = generate_pdf(&boards, &settings)
-        .map_err(|e| anyhow::anyhow!("Failed to generate PDF: {:?}", e))?;
+    // Generate PDF using the appropriate renderer for the layout
+    let pdf_bytes = match settings.layout {
+        PdfLayout::Analysis => generate_pdf(&boards, &settings)
+            .map_err(|e| anyhow::anyhow!("Failed to generate PDF: {:?}", e))?,
+        PdfLayout::BiddingSheets => {
+            let renderer = BiddingSheetsRenderer::new(settings.clone());
+            renderer
+                .render(&boards)
+                .map_err(|e| anyhow::anyhow!("Failed to generate bidding sheets PDF: {:?}", e))?
+        }
+        PdfLayout::DeclarersPlan => {
+            let renderer = DeclarersPlanRenderer::new(settings.clone());
+            renderer
+                .render(&boards)
+                .map_err(|e| anyhow::anyhow!("Failed to generate declarer's plan PDF: {:?}", e))?
+        }
+        _ => generate_pdf(&boards, &settings)
+            .map_err(|e| anyhow::anyhow!("Failed to generate PDF: {:?}", e))?,
+    };
 
     // Determine output path
     let output_path = args
