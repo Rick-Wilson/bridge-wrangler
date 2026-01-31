@@ -29,6 +29,8 @@ Before committing, always run and fix:
 
 - No `unwrap()` or `expect()` outside test code - use proper error handling
 - No `println!()` in library code (CLI binaries are OK)
+- All public functions must have doc comments (`///`)
+- All `unsafe` blocks must have a comment explaining why they're safe
 - Prefer editing existing files over creating new ones
 
 ## Git Configuration
