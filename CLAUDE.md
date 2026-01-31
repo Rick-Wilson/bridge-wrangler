@@ -74,3 +74,17 @@ When making changes to upstream dependencies, bridge-wrangler may need updates t
 
 - `.github/workflows/ci.yml` - Build, test, lint on push/PR
 - `.github/workflows/check-dependencies.yml` - Daily check for dependency updates (4 AM Pacific), auto-releases patch version if found
+
+## Notifications
+
+Send Pushover notifications when work is blocked or completed:
+
+```bash
+pushover "message" "title"    # title defaults to "Claude Code"
+```
+
+**When to notify:**
+- Waiting for user input or permission
+- Task completed after extended work
+- Build/test failures that need attention
+- Any situation where work is paused and user may not notice
