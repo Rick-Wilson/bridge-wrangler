@@ -1,11 +1,6 @@
 use anyhow::{Context, Result};
 use clap::{Args as ClapArgs, ValueEnum};
-use pbn_to_pdf::cli::Layout as PdfLayout;
-use pbn_to_pdf::{
-    config::Settings,
-    parser::parse_pbn,
-    render::{generate_pdf, BiddingSheetsRenderer, DealerSummaryRenderer, DeclarersPlanRenderer},
-};
+use pbn_to_pdf::{parse_pbn, render_boards, Layout as PdfLayout};
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, Copy, ValueEnum, Default)]
@@ -46,35 +41,22 @@ pub struct Args {
     #[arg(short, long, value_enum, default_value = "analysis")]
     pub layout: Layout,
 
-    /// Boards per page (1, 2, or 4)
-    #[arg(short, long)]
-    pub boards_per_page: Option<u8>,
-
     /// Board range to include (e.g., "1-4" or "1,3,5")
     #[arg(short = 'r', long)]
     pub board_range: Option<String>,
-
-    /// Hide bidding
-    #[arg(long)]
-    pub hide_bidding: bool,
-
-    /// Hide play sequence
-    #[arg(long)]
-    pub hide_play: bool,
-
-    /// Hide commentary
-    #[arg(long)]
-    pub hide_commentary: bool,
-
-    /// Show high card points
-    #[arg(long)]
-    pub show_hcp: bool,
 }
 
 pub fn run(args: Args) -> Result<()> {
     // Read input file
     let content = std::fs::read_to_string(&args.input)
         .with_context(|| format!("Failed to read input file: {}", args.input.display()))?;
+
+    // Extract metadata comments (lines starting with %)
+    let metadata_comments: Vec<String> = content
+        .lines()
+        .filter(|line| line.starts_with('%'))
+        .map(String::from)
+        .collect();
 
     // Parse PBN
     let pbn_file =
@@ -102,52 +84,9 @@ pub fn run(args: Args) -> Result<()> {
         return Err(anyhow::anyhow!("No boards to render after filtering"));
     }
 
-    // Build settings
-    let mut settings = Settings::default().with_metadata(&pbn_file.metadata);
-
-    // Apply CLI overrides
-    settings.layout = args.layout.into();
-
-    if let Some(bpp) = args.boards_per_page {
-        settings.boards_per_page = bpp;
-    }
-
-    if args.hide_bidding {
-        settings.show_bidding = false;
-    }
-    if args.hide_play {
-        settings.show_play = false;
-    }
-    if args.hide_commentary {
-        settings.show_commentary = false;
-    }
-    if args.show_hcp {
-        settings.show_hcp = true;
-    }
-
-    // Generate PDF using the appropriate renderer for the layout
-    let pdf_bytes = match settings.layout {
-        PdfLayout::Analysis => generate_pdf(&boards, &settings)
-            .map_err(|e| anyhow::anyhow!("Failed to generate PDF: {:?}", e))?,
-        PdfLayout::BiddingSheets => {
-            let renderer = BiddingSheetsRenderer::new(settings.clone());
-            renderer
-                .render(&boards)
-                .map_err(|e| anyhow::anyhow!("Failed to generate bidding sheets PDF: {:?}", e))?
-        }
-        PdfLayout::DeclarersPlan => {
-            let renderer = DeclarersPlanRenderer::new(settings.clone());
-            renderer
-                .render(&boards)
-                .map_err(|e| anyhow::anyhow!("Failed to generate declarer's plan PDF: {:?}", e))?
-        }
-        PdfLayout::DealerSummary => {
-            let renderer = DealerSummaryRenderer::new(settings.clone());
-            renderer
-                .render(&boards)
-                .map_err(|e| anyhow::anyhow!("Failed to generate dealer summary PDF: {:?}", e))?
-        }
-    };
+    // Generate PDF using the high-level API
+    let pdf_bytes = render_boards(&boards, &metadata_comments, args.layout.into())
+        .map_err(|e| anyhow::anyhow!("Failed to generate PDF: {:?}", e))?;
 
     // Determine output path
     let output_path = args
