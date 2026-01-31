@@ -1,0 +1,96 @@
+name: Check Dependencies
+
+on:
+  schedule:
+    # 4 AM Pacific (12:00 UTC during PST, 11:00 UTC during PDT)
+    - cron: '0 12 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: Check for dependency updates
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-registry-
+
+    - name: Cache cargo index
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-git-
+
+    - name: Check for updates
+      id: check
+      run: |
+        # Capture current lockfile hash
+        old_hash=$(sha256sum Cargo.lock | cut -d' ' -f1)
+
+        # Update dependencies
+        cargo update
+
+        # Check if anything changed
+        new_hash=$(sha256sum Cargo.lock | cut -d' ' -f1)
+
+        if [ "$old_hash" != "$new_hash" ]; then
+          echo "updated=true" >> $GITHUB_OUTPUT
+          echo "Dependencies have been updated"
+        else
+          echo "updated=false" >> $GITHUB_OUTPUT
+          echo "No dependency updates found"
+        fi
+
+    - name: Build
+      if: steps.check.outputs.updated == 'true'
+      run: cargo build --release
+
+    - name: Run tests
+      if: steps.check.outputs.updated == 'true'
+      run: cargo test
+
+    - name: Bump patch version and release
+      if: steps.check.outputs.updated == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Extract current version and bump patch
+        current=$(grep '^version' Cargo.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
+        major=$(echo $current | cut -d. -f1)
+        minor=$(echo $current | cut -d. -f2)
+        patch=$(echo $current | cut -d. -f3)
+        new_version="$major.$minor.$((patch + 1))"
+
+        echo "Bumping version from $current to $new_version"
+        sed -i "s/^version = \"$current\"/version = \"$new_version\"/" Cargo.toml
+
+        # Configure git
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Commit and tag
+        git add Cargo.toml Cargo.lock
+        git commit -m "Release v$new_version (dependency update)"
+        git tag "v$new_version"
+        git push && git push --tags
+
+        # Create GitHub release
+        gh release create "v$new_version" \
+          --title "v$new_version" \
+          --notes "Automated release for dependency updates"
