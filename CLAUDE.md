@@ -31,6 +31,12 @@ Before committing, always run and fix:
 - No `println!()` in library code (CLI binaries are OK)
 - Prefer editing existing files over creating new ones
 
+## Git Configuration
+
+Use SSH for all GitHub operations:
+- Clone/push/pull: `git@github.com:Rick-Wilson/repo.git` (not `https://`)
+- Remote URLs should use SSH format
+
 ## Architecture
 
 ```
