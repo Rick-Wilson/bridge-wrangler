@@ -4,7 +4,7 @@ use pbn_to_pdf::cli::Layout as PdfLayout;
 use pbn_to_pdf::{
     config::Settings,
     parser::parse_pbn,
-    render::{generate_pdf, BiddingSheetsRenderer, DeclarersPlanRenderer},
+    render::{generate_pdf, BiddingSheetsRenderer, DealerSummaryRenderer, DeclarersPlanRenderer},
 };
 use std::path::PathBuf;
 
@@ -17,6 +17,8 @@ pub enum Layout {
     BiddingSheets,
     /// 4 deals per page for declarer's planning practice
     DeclarersPlan,
+    /// 6 deals per page summary for the dealer
+    DealerSummary,
 }
 
 impl From<Layout> for PdfLayout {
@@ -25,6 +27,7 @@ impl From<Layout> for PdfLayout {
             Layout::Analysis => PdfLayout::Analysis,
             Layout::BiddingSheets => PdfLayout::BiddingSheets,
             Layout::DeclarersPlan => PdfLayout::DeclarersPlan,
+            Layout::DealerSummary => PdfLayout::DealerSummary,
         }
     }
 }
@@ -138,8 +141,12 @@ pub fn run(args: Args) -> Result<()> {
                 .render(&boards)
                 .map_err(|e| anyhow::anyhow!("Failed to generate declarer's plan PDF: {:?}", e))?
         }
-        _ => generate_pdf(&boards, &settings)
-            .map_err(|e| anyhow::anyhow!("Failed to generate PDF: {:?}", e))?,
+        PdfLayout::DealerSummary => {
+            let renderer = DealerSummaryRenderer::new(settings.clone());
+            renderer
+                .render(&boards)
+                .map_err(|e| anyhow::anyhow!("Failed to generate dealer summary PDF: {:?}", e))?
+        }
     };
 
     // Determine output path
