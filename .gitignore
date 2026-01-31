@@ -2,3 +2,4 @@
 /tests/fixtures/output/
 .DS_Store
 /.cargo/
+activity-log.json
