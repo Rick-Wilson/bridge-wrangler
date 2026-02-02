@@ -94,13 +94,8 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
-        # Commit and tag
+        # Commit and tag - release.yml will handle creating the GitHub release with binaries
         git add Cargo.toml Cargo.lock
         git commit -m "Release v$new_version (dependency update)"
         git tag "v$new_version"
         git push && git push --tags
-
-        # Create GitHub release
-        gh release create "v$new_version" \
-          --title "v$new_version" \
-          --notes "Automated release for dependency updates"
