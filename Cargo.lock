@@ -359,7 +359,7 @@ source = "git+https://github.com/Rick-Wilson/bridge-types#f3017fd5b0fbda7f21b860
 
 [[package]]
 name = "bridge-wrangler"
-version = "0.6.5"
+version = "0.6.6"
 dependencies = [
  "anyhow",
  "bridge-parsers",
@@ -2225,7 +2225,7 @@ dependencies = [
 [[package]]
 name = "pbn-to-pdf"
 version = "0.10.2"
-source = "git+https://github.com/Rick-Wilson/pbn-to-pdf#1a1a1e5268b3623bfda7056195e9b5a420cf1715"
+source = "git+https://github.com/Rick-Wilson/pbn-to-pdf#c91bfa2a187ef1d3b961e4648ce1f94666a0d913"
 dependencies = [
  "anyhow",
  "bridge-types",
