@@ -315,7 +315,6 @@ dependencies = [
 [[package]]
 name = "bridge-encodings"
 version = "0.1.0"
-source = "git+https://github.com/Rick-Wilson/bridge-encodings#c969019aea21eaa255894d1381ec569787e54cc2"
 dependencies = [
  "bridge-types",
  "thiserror",
@@ -324,7 +323,6 @@ dependencies = [
 [[package]]
 name = "bridge-parsers"
 version = "0.1.0"
-source = "git+https://github.com/Rick-Wilson/Bridge-Parsers#78d118d24712d0979af79139c3f36ce8a0723ae1"
 dependencies = [
  "anyhow",
  "bridge-encodings",
@@ -347,7 +345,6 @@ dependencies = [
 [[package]]
 name = "bridge-solver"
 version = "0.4.0"
-source = "git+https://github.com/Rick-Wilson/bridge-solver#dcdabe3fcd9b75fb55e2d2b1af2a10819570c207"
 dependencies = [
  "bridge-types",
 ]
@@ -355,11 +352,10 @@ dependencies = [
 [[package]]
 name = "bridge-types"
 version = "0.1.0"
-source = "git+https://github.com/Rick-Wilson/bridge-types#f3017fd5b0fbda7f21b860be3333102797580541"
 
 [[package]]
 name = "bridge-wrangler"
-version = "0.6.28"
+version = "0.7.0"
 dependencies = [
  "anyhow",
  "bridge-parsers",
@@ -4602,3 +4598,7 @@ checksum = "410e9ecef634c709e3831c2cfdb8d9c32164fae1c67496d5b68fff728eec37fe"
 dependencies = [
  "zune-core 0.5.1",
 ]
+
+[[patch.unused]]
+name = "pbn-to-pdf"
+version = "0.12.0"
