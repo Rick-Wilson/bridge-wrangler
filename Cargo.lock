@@ -359,7 +359,7 @@ source = "git+https://github.com/Rick-Wilson/bridge-types#f3017fd5b0fbda7f21b860
 
 [[package]]
 name = "bridge-wrangler"
-version = "0.6.27"
+version = "0.6.28"
 dependencies = [
  "anyhow",
  "bridge-parsers",
@@ -2591,12 +2591,9 @@ dependencies = [
 
 [[package]]
 name = "pxfm"
-version = "0.1.27"
+version = "0.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7186d3822593aa4393561d186d1393b3923e9d6163d3fbfd6e825e3e6cf3e6a8"
-dependencies = [
- "num-traits",
-]
+checksum = "b5a041e753da8b807c9255f28de81879c78c876392ff2469cde94799b2896b9d"
 
 [[package]]
 name = "quick-error"
