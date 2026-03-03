@@ -315,6 +315,7 @@ dependencies = [
 [[package]]
 name = "bridge-encodings"
 version = "0.1.0"
+source = "git+https://github.com/Rick-Wilson/bridge-encodings#c969019aea21eaa255894d1381ec569787e54cc2"
 dependencies = [
  "bridge-types",
  "thiserror",
@@ -323,6 +324,7 @@ dependencies = [
 [[package]]
 name = "bridge-parsers"
 version = "0.1.0"
+source = "git+https://github.com/Rick-Wilson/Bridge-Parsers#78d118d24712d0979af79139c3f36ce8a0723ae1"
 dependencies = [
  "anyhow",
  "bridge-encodings",
@@ -345,6 +347,7 @@ dependencies = [
 [[package]]
 name = "bridge-solver"
 version = "0.4.0"
+source = "git+https://github.com/Rick-Wilson/bridge-solver#dcdabe3fcd9b75fb55e2d2b1af2a10819570c207"
 dependencies = [
  "bridge-types",
 ]
@@ -352,6 +355,7 @@ dependencies = [
 [[package]]
 name = "bridge-types"
 version = "0.1.0"
+source = "git+https://github.com/Rick-Wilson/bridge-types#f3017fd5b0fbda7f21b860be3333102797580541"
 
 [[package]]
 name = "bridge-wrangler"
@@ -1136,20 +1140,20 @@ dependencies = [
  "cfg-if",
  "js-sys",
  "libc",
- "r-efi",
+ "r-efi 5.3.0",
  "wasip2",
  "wasm-bindgen",
 ]
 
 [[package]]
 name = "getrandom"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "139ef39800118c7683f2fd3c98c1b23c09ae076556b435f8e9064ae108aaeeec"
+checksum = "0de51e6874e94e7bf76d726fc5d13ba782deca734ff60d5bb2fb2607c7406555"
 dependencies = [
  "cfg-if",
  "libc",
- "r-efi",
+ "r-efi 6.0.0",
  "wasip2",
  "wasip3",
 ]
@@ -1661,9 +1665,9 @@ dependencies = [
 
 [[package]]
 name = "ipnet"
-version = "2.11.0"
+version = "2.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "469fb0b9cefa57e3ef31275ee7cacb78f2fdca44e4765491884a2b119d4eb130"
+checksum = "d98f6fed1fde3f8c21bc40a1abb88dd75e67924f9cffc3ef95607bad8017f8e2"
 
 [[package]]
 name = "iri-string"
@@ -2271,8 +2275,8 @@ dependencies = [
 
 [[package]]
 name = "pbn-to-pdf"
-version = "0.11.1"
-source = "git+https://github.com/Rick-Wilson/pbn-to-pdf#34f1e09f9fa92e09786978cc3e1662b9f3d49ba6"
+version = "0.12.0"
+source = "git+https://github.com/Rick-Wilson/pbn-to-pdf#79a38e4a64d701db5e8da60787565bc02d815ff6"
 dependencies = [
  "anyhow",
  "bridge-types",
@@ -2611,6 +2615,12 @@ name = "r-efi"
 version = "5.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
+
+[[package]]
+name = "r-efi"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
 name = "rand"
@@ -3491,7 +3501,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "82a72c767771b47409d2345987fda8628641887d5466101319899796367354a0"
 dependencies = [
  "fastrand",
- "getrandom 0.4.1",
+ "getrandom 0.4.2",
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",
@@ -3618,9 +3628,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.49.0"
+version = "1.50.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72a2903cd7736441aac9df9d7688bd0ce48edccaadf181c3b90be801e81d3d86"
+checksum = "27ad5e34374e03cfffefc301becb44e9dc3c17584f414349ebe29ed26661822d"
 dependencies = [
  "bytes",
  "libc",
@@ -4598,7 +4608,3 @@ checksum = "410e9ecef634c709e3831c2cfdb8d9c32164fae1c67496d5b68fff728eec37fe"
 dependencies = [
  "zune-core 0.5.1",
 ]
-
-[[patch.unused]]
-name = "pbn-to-pdf"
-version = "0.12.0"
