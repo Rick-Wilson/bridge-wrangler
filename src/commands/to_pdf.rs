@@ -10,7 +10,13 @@ pub enum Layout {
     Analysis,
     /// Simplified layout for practice bidding
     BiddingSheets,
-    /// 4 deals per page for declarer's planning practice
+    /// Declarer's plan - 1 deal per page (full size)
+    #[value(name = "declarers-plan-1up")]
+    DeclarersPlan1up,
+    /// Declarer's plan - 2 deals per page (rotated 90°)
+    #[value(name = "declarers-plan-2up")]
+    DeclarersPlan2up,
+    /// Declarer's plan practice sheets (4 deals per page)
     DeclarersPlan,
     /// 6 deals per page summary for the dealer
     DealerSummary,
@@ -21,6 +27,8 @@ impl From<Layout> for PdfLayout {
         match layout {
             Layout::Analysis => PdfLayout::Analysis,
             Layout::BiddingSheets => PdfLayout::BiddingSheets,
+            Layout::DeclarersPlan1up => PdfLayout::DeclarersPlan1up,
+            Layout::DeclarersPlan2up => PdfLayout::DeclarersPlan2up,
             Layout::DeclarersPlan => PdfLayout::DeclarersPlan,
             Layout::DealerSummary => PdfLayout::DealerSummary,
         }
