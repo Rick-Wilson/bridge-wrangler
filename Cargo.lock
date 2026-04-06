@@ -359,7 +359,7 @@ source = "git+https://github.com/Rick-Wilson/bridge-types#f3017fd5b0fbda7f21b860
 
 [[package]]
 name = "bridge-wrangler"
-version = "0.8.5"
+version = "0.8.6"
 dependencies = [
  "anyhow",
  "bridge-parsers",
