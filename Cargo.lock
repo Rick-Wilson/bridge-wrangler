@@ -359,7 +359,7 @@ source = "git+https://github.com/Rick-Wilson/bridge-types#a1272c0605d198df64b0cf
 
 [[package]]
 name = "bridge-wrangler"
-version = "0.8.33"
+version = "0.8.34"
 dependencies = [
  "anyhow",
  "bridge-parsers",
@@ -1198,9 +1198,9 @@ checksum = "b40ca9252762c466af32d0b1002e91e4e1bc5398f77455e55474deb466355ff5"
 
 [[package]]
 name = "h2"
-version = "0.4.13"
+version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f44da3a8150a6703ed5d34e164b875fd14c2cdab9af1252a9a1020bde2bdc54"
+checksum = "171fefbc92fe4a4de27e0698d6a5b392d6a0e333506bc49133760b3bcf948733"
 dependencies = [
  "atomic-waker",
  "bytes",
