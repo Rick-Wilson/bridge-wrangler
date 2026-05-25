@@ -315,6 +315,7 @@ dependencies = [
 [[package]]
 name = "bridge-encodings"
 version = "0.1.0"
+source = "git+https://github.com/Rick-Wilson/bridge-encodings#c969019aea21eaa255894d1381ec569787e54cc2"
 dependencies = [
  "bridge-types",
  "thiserror",
@@ -323,6 +324,7 @@ dependencies = [
 [[package]]
 name = "bridge-parsers"
 version = "0.1.0"
+source = "git+https://github.com/Rick-Wilson/Bridge-Parsers#c386a57afc920d1f2dc9ea4196e2914d60a3c01c"
 dependencies = [
  "anyhow",
  "bridge-encodings",
@@ -345,6 +347,7 @@ dependencies = [
 [[package]]
 name = "bridge-solver"
 version = "0.4.0"
+source = "git+https://github.com/Rick-Wilson/bridge-solver#dcdabe3fcd9b75fb55e2d2b1af2a10819570c207"
 dependencies = [
  "bridge-types",
 ]
@@ -352,6 +355,7 @@ dependencies = [
 [[package]]
 name = "bridge-types"
 version = "0.1.0"
+source = "git+https://github.com/Rick-Wilson/bridge-types#a1272c0605d198df64b0cf0eae593a0d56ef1b37"
 
 [[package]]
 name = "bridge-wrangler"
@@ -821,7 +825,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1693,9 +1697,9 @@ checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
 name = "jiff"
-version = "0.2.24"
+version = "0.2.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f00b5dbd620d61dfdcb6007c9c1f6054ebd75319f163d886a9055cec1155073d"
+checksum = "6835eea34fb6321b9b3aa7b685c2b433948c09447e389dc017fdf687d5d11e65"
 dependencies = [
  "jiff-static",
  "log",
@@ -1706,9 +1710,9 @@ dependencies = [
 
 [[package]]
 name = "jiff-static"
-version = "0.2.24"
+version = "0.2.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e000de030ff8022ea1da3f466fbb0f3a809f5e51ed31f6dd931c35181ad8e6d7"
+checksum = "3c22e04db9c58f5136eb1757f3d5c49a7b187f49e52185228cbd2f5acdfcc08c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1808,9 +1812,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.29"
+version = "0.4.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
+checksum = "616ec5685824bcc94416c6d4a7a446eea774a31efd7062c8480ba6fd06d7a6e5"
 
 [[package]]
 name = "lopdf"
@@ -2262,6 +2266,7 @@ dependencies = [
 [[package]]
 name = "pbn-to-pdf"
 version = "0.16.0"
+source = "git+https://github.com/Rick-Wilson/pbn-to-pdf#2571578335f6c61ffedb1734c8cdcb410317fcc0"
 dependencies = [
  "anyhow",
  "bridge-types",
@@ -2942,7 +2947,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3483,7 +3488,7 @@ dependencies = [
  "getrandom 0.4.2",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
