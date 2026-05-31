@@ -99,3 +99,7 @@ jobs:
         git commit -m "Release v$new_version (dependency update)"
         git tag "v$new_version"
         git push && git push --tags
+
+        # Tag pushes from GITHUB_TOKEN do not trigger downstream workflows, so
+        # explicitly dispatch the release build against the new tag ref.
+        gh workflow run release.yml --ref "v$new_version"
