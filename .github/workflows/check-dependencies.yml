@@ -13,6 +13,7 @@ jobs:
   check:
     permissions:
       contents: write
+      actions: write
     name: Check for dependency updates
     runs-on: ubuntu-latest
 
